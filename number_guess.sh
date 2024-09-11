@@ -1,7 +1,9 @@
 #!/bin/bash
 PSQL="psql --username=freecodecamp --dbname=number_guess -t --no-align -c"
 
-NUMBER_TO_GUESS=$RANDOM
+MIN=1
+MAX=1000
+SECRET_NUMBER=$(($RANDOM%($MAX-$MIN+1)+$MIN))
 
 echo -e "\nEnter your username:"
 read USERNAME
@@ -31,7 +33,7 @@ else
     if [[ $USER_GUESS =~ ^[0-9]{1,4}$ ]] # should be 1-1000, no more than 4 digits needed
     then
       # check against random number and tell user if higher or lower
-      echo "$USER_GUESS ? $NUMBER_TO_GUESS"
+      echo "$USER_GUESS ? $SECRET_NUMBER"
       # game ends at some point, uncomment below and delete this line:
       # GAME_FINISHED=true
     else # not valid input
