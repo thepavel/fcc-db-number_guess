@@ -44,20 +44,20 @@ else
     then
       echo "You guessed it in $GUESSES tries. The secret number was $SECRET_NUMBER. Nice job!"
       GAME_FINISHED=true
+      exit
     else 
       if [ $USER_GUESS -lt $SECRET_NUMBER ]
       then
-      echo "It's higher than that, guess again:"
+        echo "It's higher than that, guess again:"
       else 
         if [ $USER_GUESS -gt $SECRET_NUMBER ]
         then
           echo "It's lower than that, guess again:"
         else 
-          echo "Unexpected input, guess again:"
+          echo "That is not an integer, guess again:"
         fi
       fi
     fi
-
   done
 
     #   if [[ $USER_GUESS =~ ^[0-9]{1,4}$ ]] # should be 1-1000, no more than 4 digits needed
