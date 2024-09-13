@@ -50,7 +50,8 @@ SET default_table_access_method = heap;
 CREATE TABLE public.games (
     game_id integer NOT NULL,
     user_id integer NOT NULL,
-    guesses integer DEFAULT 0 NOT NULL
+    guesses integer DEFAULT 0 NOT NULL,
+    created_on timestamp without time zone DEFAULT now()
 );
 
 
@@ -130,6 +131,7 @@ ALTER TABLE ONLY public.users ALTER COLUMN user_id SET DEFAULT nextval('public.u
 -- Data for Name: games; Type: TABLE DATA; Schema: public; Owner: freecodecamp
 --
 
+INSERT INTO public.games VALUES (1, 2, 1, '2024-09-13 06:34:40.066525');
 
 
 --
@@ -137,20 +139,21 @@ ALTER TABLE ONLY public.users ALTER COLUMN user_id SET DEFAULT nextval('public.u
 --
 
 INSERT INTO public.users VALUES (1, 'testuser');
+INSERT INTO public.users VALUES (2, 'pav');
 
 
 --
 -- Name: games_game_id_seq; Type: SEQUENCE SET; Schema: public; Owner: freecodecamp
 --
 
-SELECT pg_catalog.setval('public.games_game_id_seq', 1, false);
+SELECT pg_catalog.setval('public.games_game_id_seq', 1, true);
 
 
 --
 -- Name: users_user_id_seq; Type: SEQUENCE SET; Schema: public; Owner: freecodecamp
 --
 
-SELECT pg_catalog.setval('public.users_user_id_seq', 1, true);
+SELECT pg_catalog.setval('public.users_user_id_seq', 2, true);
 
 
 --
