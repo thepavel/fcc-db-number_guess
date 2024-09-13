@@ -31,8 +31,9 @@ else
   else
     echo "$USER_ID"
     # get games data
-    # "SELECT COUNT(game_id) AS games_playes, MIN(guesses) as best_game"
-    echo "Welcome back, $USERNAME! You have played <games_played> games, and your best game took <best_game> guesses."
+    GAMES_RESULT=$($PSQL "SELECT COUNT(game_id) AS games_played, MIN(guesses) as best_game FROM games")
+    
+    echo "Welcome back, $USERNAME! You have played $GAMES_PLAYED games, and your best game took $BEST_GAME guesses."
   fi
 
   GAME_FINISHED=false
