@@ -52,6 +52,7 @@ else
     then
       echo "You guessed it in $GUESSES tries. The secret number was $SECRET_NUMBER. Nice job!"
       GAME_FINISHED=true
+      # todo update game as finished? may make stats meaningless without that.
       exit
     else 
       if [ $USER_GUESS -lt $SECRET_NUMBER ]

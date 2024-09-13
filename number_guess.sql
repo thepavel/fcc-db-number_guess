@@ -51,7 +51,8 @@ CREATE TABLE public.games (
     game_id integer NOT NULL,
     user_id integer NOT NULL,
     guesses integer DEFAULT 0 NOT NULL,
-    created_on timestamp without time zone DEFAULT now()
+    created_on timestamp without time zone DEFAULT now(),
+    is_completed boolean DEFAULT false
 );
 
 
@@ -131,7 +132,7 @@ ALTER TABLE ONLY public.users ALTER COLUMN user_id SET DEFAULT nextval('public.u
 -- Data for Name: games; Type: TABLE DATA; Schema: public; Owner: freecodecamp
 --
 
-INSERT INTO public.games VALUES (1, 2, 1, '2024-09-13 06:34:40.066525');
+INSERT INTO public.games VALUES (1, 2, 1, '2024-09-13 06:34:40.066525', true);
 
 
 --
