@@ -13,19 +13,20 @@ then
   echo Username required. Please try again.
 else 
   # TODO validate input
-  # USER_ID=$($PSQL "SELECT users.user_id, COUNT(games.game_id) AS games_played, MIN(guesses) AS best_game FROM users LEFT JOIN games USING(user_id) WHERE username = '$USERNAME' GROUP BY users.user_id")
-  USER_ID=$($PSQL "SELECT users.user_id FROM users WHERE username = '$USERNAME'")
+  USER_ID=$($PSQL "SELECT user_id FROM users WHERE username = '$USERNAME'")
   
   if [[ -z $USER_ID ]]
   then 
     echo "Welcome, $USERNAME! It looks like this is your first time here."
     INSERT_USER_RESULT=$($PSQL "INSERT INTO users(username) VALUES('$USERNAME') RETURNING user_id" )
+    
     USER_ID=$( echo $INSERT_USER_RESULT | sed -E 's/^([0-9]+).*$/\1/' )
   else    
-    
-    GAMES_RESULT=$($PSQL "SELECT COUNT(game_id) AS games_played, MIN(guesses) as best_game FROM games WHERE is_completed = true and user_id = $USER_ID")
-    GAMES_PLAYED=$( echo $GAMES_RESULT | sed -E 's/^([0-9]+).*$/\1/' )
-    BEST_GAME=$( echo $GAMES_RESULT | sed -E 's/^.*\|([0-9]+)$/\1/' )
+
+    GAMES_PLAYED=$($PSQL "SELECT COUNT(game_id) FROM games WHERE is_completed = true AND user_id = $USER_ID")
+    BEST_GAME=$($PSQL "SELECT COALESCE(MIN(guesses), 0) FROM games WHERE user_id = $USER_ID AND is_completed = true")
+    # GAMES_PLAYED=$( echo $GAMES_RESULT | sed -E 's/^([0-9]+).*$/\1/' )
+    # BEST_GAME=$( echo $GAMES_RESULT | sed -E 's/\|([0-9]+)$/\1/' )
     
     echo "Welcome back, $USERNAME! You have played $GAMES_PLAYED games, and your best game took $BEST_GAME guesses."
   fi
@@ -35,23 +36,17 @@ else
   GUESSES=0
   echo "Guess the secret number between 1 and 1000:"
 
-  INSERT_GAME_RESULT=$($PSQL "INSERT INTO games(user_id) VALUES($USER_ID) RETURNING game_id" )
-  GAME_ID=$( echo $INSERT_GAME_RESULT | sed -E 's/^([0-9]+).*$/\1/' )
+  
 
   while [[ "$GAME_FINISHED" != "true" ]] ; do
     read USER_GUESS
     GUESSES=$(( $GUESSES + 1 ))
-    # updating existing game
-    UPDATE_GAME_RESULT=$( $PSQL "UPDATE games SET guesses = guesses + 1 WHERE game_id = $GAME_ID" )
 
     if [ "$USER_GUESS" -eq "$SECRET_NUMBER" ]
     then
       echo "You guessed it in $GUESSES tries. The secret number was $SECRET_NUMBER. Nice job!"
-
       GAME_FINISHED=true
-      # todo update game as finished? may make stats meaningless without that.
-      UPDATE_GAME_RESULT=$( $PSQL "UPDATE games SET is_completed = true WHERE game_id = $GAME_ID" )
-      
+      INSERT_GAME_RESULT=$($PSQL "INSERT INTO games(user_id, guesses, is_completed) VALUES($USER_ID, $GUESSES, true) RETURNING game_id" )
     else 
       
       GUESSED_NUMBER=$( echo $USER_GUESS | sed 's/[^0-9]*//g')
