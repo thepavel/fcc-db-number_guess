@@ -30,20 +30,19 @@ else
     echo "Welcome back, $USERNAME! You have played $GAMES_PLAYED games, and your best game took $BEST_GAME guesses."
   fi
   
-  INSERT_GAME_RESULT=$($PSQL "INSERT INTO games(user_id, guesses) VALUES($USER_ID, 1) RETURNING game_id" )
-  GAME_ID=$( echo $INSERT_GAME_RESULT | sed -E 's/^([0-9]+).*$/\1/' )
-
+  
   GAME_FINISHED=false
   GUESSES=0
   echo "Guess the secret number between 1 and 1000:"
+
+  INSERT_GAME_RESULT=$($PSQL "INSERT INTO games(user_id) VALUES($USER_ID) RETURNING game_id" )
+  GAME_ID=$( echo $INSERT_GAME_RESULT | sed -E 's/^([0-9]+).*$/\1/' )
 
   while [[ "$GAME_FINISHED" != "true" ]] ; do
     read USER_GUESS
     GUESSES=$(( $GUESSES + 1 ))
     # updating existing game
-      UPDATE_GAME_RESULT=$( $PSQL "UPDATE games SET guesses = guesses + 1 WHERE game_id = $GAME_ID" )
-
-    echo "$USER_ID guessed $USER_GUESS. there have been $GUESSES guesses to reach $SECRET_NUMBER"
+    UPDATE_GAME_RESULT=$( $PSQL "UPDATE games SET guesses = guesses + 1 WHERE game_id = $GAME_ID" )
 
     if [ "$USER_GUESS" -eq "$SECRET_NUMBER" ]
     then
