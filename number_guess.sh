@@ -5,7 +5,7 @@ MIN=1
 MAX=1000
 SECRET_NUMBER=$(($RANDOM%($MAX-$MIN+1)+$MIN))
 
-echo -e "\nEnter your username:"
+echo Enter your username:
 read USERNAME
 
 if [[ -z $USERNAME ]]
@@ -19,18 +19,13 @@ else
   if [[ -z $USER_ID ]]
   then 
     echo "Welcome, $USERNAME! It looks like this is your first time here."
-    # TODO: create new user with entered username
-    INSERT_USER_RESULT=$($PSQL "INSERT INTO users(username) VALUES('$USERNAME')")
-    if [[ $INSERT_USER_RESULT =~ "INSERT 0 1$" ]]
-    then 
-      echo $INSERT_USER_RESULT
-    fi
+    INSERT_USER_RESULT=$($PSQL "INSERT INTO users(username) VALUES('$USERNAME') RETURNING user_id" )
+    USER_ID=$( echo $INSERT_USER_RESULT | sed -E 's/^([0-9]+).*$/\1/' )
+  else    
     
-    USER_ID=$($PSQL "SELECT users.user_id FROM users WHERE username = '$USERNAME'")
-  else
-    
-    # get games data
-    GAMES_RESULT=$($PSQL "SELECT COUNT(game_id) AS games_played, MIN(guesses) as best_game FROM games")
+    GAMES_RESULT=$($PSQL "SELECT COUNT(game_id) AS games_played, MIN(guesses) as best_game FROM games WHERE is_completed = true and user_id = $USER_ID")
+    GAMES_PLAYED=$( echo $GAMES_RESULT | sed -E 's/^([0-9]+).*$/\1/' )
+    BEST_GAME=$( echo $GAMES_RESULT | sed -E 's/^.*\|([0-9]+)$/\1/' )
     
     echo "Welcome back, $USERNAME! You have played $GAMES_PLAYED games, and your best game took $BEST_GAME guesses."
   fi
