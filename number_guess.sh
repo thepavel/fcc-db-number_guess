@@ -10,7 +10,7 @@ read USERNAME
 
 if [[ -z $USERNAME ]]
 then
-  echo Username required. Please try again.
+  exit
 else 
   # TODO validate input
   USER_ID=$($PSQL "SELECT user_id FROM users WHERE username = '$USERNAME'")
@@ -23,33 +23,30 @@ else
     USER_ID=$( echo $INSERT_USER_RESULT | sed -E 's/^([0-9]+).*$/\1/' )
   else    
 
-    GAMES_PLAYED=$($PSQL "SELECT COUNT(game_id) FROM games WHERE is_completed = true AND user_id = $USER_ID")
-    BEST_GAME=$($PSQL "SELECT COALESCE(MIN(guesses), 0) FROM games WHERE user_id = $USER_ID AND is_completed = true")
+    GAMES_PLAYED=$($PSQL "SELECT COUNT(game_id) FROM games WHERE user_id = $USER_ID")
+    BEST_GAME=$($PSQL "SELECT COALESCE(MIN(guesses), 0) FROM games WHERE user_id = $USER_ID")
     # GAMES_PLAYED=$( echo $GAMES_RESULT | sed -E 's/^([0-9]+).*$/\1/' )
     # BEST_GAME=$( echo $GAMES_RESULT | sed -E 's/\|([0-9]+)$/\1/' )
     
     echo "Welcome back, $USERNAME! You have played $GAMES_PLAYED games, and your best game took $BEST_GAME guesses."
   fi
   
-  
   GAME_FINISHED=false
   GUESSES=0
   echo "Guess the secret number between 1 and 1000:"
 
-  
-
   while [[ "$GAME_FINISHED" != "true" ]] ; do
     read USER_GUESS
     GUESSES=$(( $GUESSES + 1 ))
+    GUESSED_NUMBER=$( echo $USER_GUESS | sed 's/[^0-9]*//g')
 
-    if [ "$USER_GUESS" -eq "$SECRET_NUMBER" ]
+    if [ $GUESSED_NUMBER -eq $SECRET_NUMBER ]
     then
+      INSERT_GAME_RESULT=$($PSQL "INSERT INTO games(user_id, guesses) VALUES($USER_ID, $GUESSES) RETURNING game_id" )
       echo "You guessed it in $GUESSES tries. The secret number was $SECRET_NUMBER. Nice job!"
-      GAME_FINISHED=true
-      INSERT_GAME_RESULT=$($PSQL "INSERT INTO games(user_id, guesses, is_completed) VALUES($USER_ID, $GUESSES, true) RETURNING game_id" )
+      exit
     else 
       
-      GUESSED_NUMBER=$( echo $USER_GUESS | sed 's/[^0-9]*//g')
       if [ $GUESSED_NUMBER -lt $SECRET_NUMBER ]
       then
         echo "It's higher than that, guess again:"
