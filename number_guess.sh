@@ -24,18 +24,16 @@ else
   else    
 
     GAMES_PLAYED=$($PSQL "SELECT COUNT(game_id) FROM games WHERE user_id = $USER_ID")
-    BEST_GAME=$($PSQL "SELECT COALESCE(MIN(guesses), 0) FROM games WHERE user_id = $USER_ID")
-    # GAMES_PLAYED=$( echo $GAMES_RESULT | sed -E 's/^([0-9]+).*$/\1/' )
-    # BEST_GAME=$( echo $GAMES_RESULT | sed -E 's/\|([0-9]+)$/\1/' )
+    BEST_GAME=$($PSQL "SELECT MIN(guesses) FROM games WHERE user_id = $USER_ID")
     
     echo "Welcome back, $USERNAME! You have played $GAMES_PLAYED games, and your best game took $BEST_GAME guesses."
   fi
   
   GAME_FINISHED=false
   GUESSES=0
-  echo "Guess the secret number between 1 and 1000:"
-
+  
   while [[ "$GAME_FINISHED" != "true" ]] ; do
+    echo "Guess the secret number between 1 and 1000:"
     read USER_GUESS
     GUESSES=$(( $GUESSES + 1 ))
     GUESSED_NUMBER=$( echo $USER_GUESS | sed 's/[^0-9]*//g')

@@ -131,18 +131,12 @@ ALTER TABLE ONLY public.users ALTER COLUMN user_id SET DEFAULT nextval('public.u
 -- Data for Name: games; Type: TABLE DATA; Schema: public; Owner: freecodecamp
 --
 
-INSERT INTO public.games VALUES (1, 2, 1, '2024-09-13 06:34:40.066525');
-INSERT INTO public.games VALUES (2, 1, 9, '2024-09-16 05:02:53.882673');
-INSERT INTO public.games VALUES (10, 5, 8, '2024-09-16 05:07:27.884804');
 
 
 --
 -- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: freecodecamp
 --
 
-INSERT INTO public.users VALUES (1, 'testuser');
-INSERT INTO public.users VALUES (2, 'pav');
-INSERT INTO public.users VALUES (5, 'pavel');
 
 
 --
