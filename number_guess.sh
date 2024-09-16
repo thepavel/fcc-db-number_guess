@@ -1,11 +1,12 @@
 #!/bin/bash
+
 PSQL="psql --username=freecodecamp --dbname=number_guess -t --no-align -c"
 
 MIN=1
 MAX=1000
 SECRET_NUMBER=$(($RANDOM%($MAX-$MIN+1)+$MIN))
 
-echo Enter your username:
+echo "Enter your username:"
 read USERNAME
 
 if [[ -z $USERNAME ]]
@@ -18,9 +19,6 @@ else
   if [[ -z $USER_ID ]]
   then 
     echo "Welcome, $USERNAME! It looks like this is your first time here."
-    INSERT_USER_RESULT=$($PSQL "INSERT INTO users(username) VALUES('$USERNAME') RETURNING user_id" )
-    
-    USER_ID=$( echo $INSERT_USER_RESULT | sed -E 's/^([0-9]+).*$/\1/' )
   else    
 
     GAMES_PLAYED=$($PSQL "SELECT COUNT(game_id) FROM games WHERE user_id = $USER_ID")
@@ -31,18 +29,26 @@ else
   
   GAME_FINISHED=false
   GUESSES=0
-  
   while [[ "$GAME_FINISHED" != "true" ]] ; do
     echo "Guess the secret number between 1 and 1000:"
     read USER_GUESS
-    GUESSES=$(( $GUESSES + 1 ))
+
     GUESSED_NUMBER=$( echo $USER_GUESS | sed 's/[^0-9]*//g')
+    GUESSES=$(( $GUESSES + 1 ))
 
     if [ $GUESSED_NUMBER -eq $SECRET_NUMBER ]
     then
-      INSERT_GAME_RESULT=$($PSQL "INSERT INTO games(user_id, guesses) VALUES($USER_ID, $GUESSES) RETURNING game_id" )
+      if [[ -z $USER_ID ]] 
+      then 
+        INSERT_USER_RESULT=$($PSQL "INSERT INTO users(username) VALUES('$USERNAME') RETURNING user_id" )
+    
+        USER_ID=$( echo $INSERT_USER_RESULT | sed -E 's/^([0-9]+).*$/\1/' )
+      fi
+
+      INSERT_GAME_RESULT=$($PSQL "INSERT INTO games(user_id, guesses) VALUES($USER_ID, $GUESSES)" )
       echo "You guessed it in $GUESSES tries. The secret number was $SECRET_NUMBER. Nice job!"
-      exit
+      
+      return
     else 
       
       if [ $GUESSED_NUMBER -lt $SECRET_NUMBER ]
