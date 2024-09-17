@@ -85,7 +85,9 @@ ALTER SEQUENCE public.games_game_id_seq OWNED BY public.games.game_id;
 
 CREATE TABLE public.users (
     user_id integer NOT NULL,
-    username character varying(22) NOT NULL
+    username character varying(22) NOT NULL,
+    best_game integer,
+    games_played integer
 );
 
 
@@ -143,14 +145,14 @@ ALTER TABLE ONLY public.users ALTER COLUMN user_id SET DEFAULT nextval('public.u
 -- Name: games_game_id_seq; Type: SEQUENCE SET; Schema: public; Owner: freecodecamp
 --
 
-SELECT pg_catalog.setval('public.games_game_id_seq', 10, true);
+SELECT pg_catalog.setval('public.games_game_id_seq', 1, true);
 
 
 --
 -- Name: users_user_id_seq; Type: SEQUENCE SET; Schema: public; Owner: freecodecamp
 --
 
-SELECT pg_catalog.setval('public.users_user_id_seq', 5, true);
+SELECT pg_catalog.setval('public.users_user_id_seq', 1, true);
 
 
 --
