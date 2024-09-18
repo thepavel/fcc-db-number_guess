@@ -5,6 +5,8 @@ MIN=1
 MAX=1000
 SECRET_NUMBER=$(($RANDOM%($MAX-$MIN+1)+$MIN))
 
+NEW_USER=false
+
 echo Enter your username:
 read USERNAME
 
@@ -12,25 +14,23 @@ if [[ -z $USERNAME ]]
 then
   exit
 else 
+  # SELECT user_id, username, games_played, best_game FROM users WHERE username = 'testuser'
+  USER_INFO=$($PSQL "SELECT user_id, username, games_played, best_game FROM users WHERE username = '$USERNAME'")
   # TODO validate input
-  USER_ID=$($PSQL "SELECT user_id FROM users WHERE username = '$USERNAME'")
-  
-  if [[ -z $USER_ID ]]
+
+  if [[ -z $USER_INFO ]]
   then 
     echo "Welcome, $USERNAME! It looks like this is your first time here."
-    INSERT_USER_RESULT=$($PSQL "INSERT INTO users(username, games_played) VALUES('$USERNAME', 1) RETURNING user_id" )
-    
-    USER_ID=$( echo $INSERT_USER_RESULT | sed -E 's/^([0-9]+).*$/\1/' )
+    $($PSQL "INSERT INTO users(username) VALUES('$USERNAME')")
+    USER_INFO=$($PSQL "SELECT user_id, username, games_played, best_game FROM users WHERE username = '$USERNAME'")
   else   
-    # update games played
-    UPDATE_RESULT=$($PSQL "UPDATE users SET games_played = games_played + 1 WHERE user_id = $USER_ID")
-    
-    GAMES_PLAYED=$($PSQL "SELECT games_played FROM users WHERE user_id = $USER_ID")
-    BEST_GAME=$($PSQL "SELECT best_game FROM users WHERE user_id = $USER_ID")
-    USER_INFO=($PSQL "SELECT games_played, best_game FROM users WHERE user_id = $USER_ID")
-    echo "Welcome back, ${USERNAME}! You have played ${USER_INFO[0]} games, and your best game took ${USER_INFO[1]} guesses."
     echo "Welcome back, $USERNAME! You have played $GAMES_PLAYED games, and your best game took $BEST_GAME guesses."
   fi
+
+  USER_INFO_ARRAY=( $( echo $USER_INFO | sed -E 's/\|/\ /g' ) )
+  USER_ID=${USER_INFO_ARRAY[1]}
+  GAMES_PLAYED=${USER_INFO_ARRAY[2]}
+  BEST_GAME=${USER_INFO_ARRAY[3]}
   
   GAME_FINISHED=false
   GUESSES=0
@@ -44,15 +44,13 @@ else
 
     if [ $GUESSED_NUMBER -eq $SECRET_NUMBER ]
     then
-      echo $GUESSES
-      echo $BEST_GAME
-      # if [ $GUESSES -lt $BEST_GAME ] 
-      # then 
-      #   $( $PSQL "UPDATE users SET best_game = $BEST_GAME WHERE user_id = $USER_ID" )
-      # fi
+      BEST_GAME=$(($GUESSES < $BEST_GAME || $BEST_GAME == 0 ? $GUESSES : $BEST_GAME))
+      
+      # update user
+      $($PSQL "UPDATE users SET games_played = games_played + 1, best_game = $BEST_GAME WHERE user_id = $USER_ID")
       
       echo "You guessed it in $GUESSES tries. The secret number was $SECRET_NUMBER. Nice job!"
-      exit
+      
     else 
       
       if [ $GUESSED_NUMBER -lt $SECRET_NUMBER ]
