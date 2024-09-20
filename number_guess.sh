@@ -42,13 +42,17 @@ else
   while [[ "$GAME_FINISHED" != "true" ]] ; do
     read USER_GUESS
     GUESSED_NUMBER=$( echo $USER_GUESS | sed 's/[^0-9]*//g')
+    
     if [[ -z $GUESSED_NUMBER ]]; then 
       echo "That is not an integer, guess again:"
       continue
     fi
+
+    echo "incrementing $GUESSES when guessing: $GUESSED_NUMBER"
+    GUESSES=$(( $GUESSES + 1 ))
     if [ $GUESSED_NUMBER -eq $SECRET_NUMBER ]
     then
-      GUESSES=$(( $GUESSES + 1 ))
+      
       BEST_GAME=$(($GUESSES < $BEST_GAME || $BEST_GAME == 0 ? $GUESSES : $BEST_GAME))
       
       # update user
@@ -59,12 +63,10 @@ else
     else 
       if [ $GUESSED_NUMBER -lt $SECRET_NUMBER ]
       then
-        GUESSES=$(( $GUESSES + 1 ))
         echo "It's higher than that, guess again:"
       else 
         if [ $GUESSED_NUMBER -gt $SECRET_NUMBER ]
         then
-          GUESSES=$(( $GUESSES + 1 ))
           echo "It's lower than that, guess again:"
         fi
       fi
