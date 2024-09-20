@@ -16,19 +16,22 @@ then
 else 
   # SELECT user_id, username, games_played, best_game FROM users WHERE username = 'testuser'
   USER_INFO=$($PSQL "SELECT user_id, username, games_played, best_game FROM users WHERE username = '$USERNAME'")
+  USER_INFO_ARRAY=( $( echo $USER_INFO | sed -E 's/\|/\ /g' ) )
   # TODO validate input
 
   if [[ -z $USER_INFO ]]
   then 
     echo "Welcome, $USERNAME! It looks like this is your first time here."
-    $($PSQL "INSERT INTO users(username) VALUES('$USERNAME')")
+    NEW_USER=true
+    INSERT_USER_RESULT=$($PSQL "INSERT INTO users(username) VALUES('$USERNAME')")
+
     USER_INFO=$($PSQL "SELECT user_id, username, games_played, best_game FROM users WHERE username = '$USERNAME'")
+    USER_INFO_ARRAY=( $( echo $USER_INFO | sed -E 's/\|/\ /g' ) )
   else   
-    echo "Welcome back, $USERNAME! You have played $GAMES_PLAYED games, and your best game took $BEST_GAME guesses."
+    echo "Welcome back, $USERNAME! You have played ${USER_INFO_ARRAY[2]} games, and your best game took ${USER_INFO_ARRAY[3]} guesses."
   fi
 
-  USER_INFO_ARRAY=( $( echo $USER_INFO | sed -E 's/\|/\ /g' ) )
-  USER_ID=${USER_INFO_ARRAY[1]}
+  USER_ID=${USER_INFO_ARRAY[0]}
   GAMES_PLAYED=${USER_INFO_ARRAY[2]}
   BEST_GAME=${USER_INFO_ARRAY[3]}
   
@@ -47,10 +50,10 @@ else
       BEST_GAME=$(($GUESSES < $BEST_GAME || $BEST_GAME == 0 ? $GUESSES : $BEST_GAME))
       
       # update user
-      $($PSQL "UPDATE users SET games_played = games_played + 1, best_game = $BEST_GAME WHERE user_id = $USER_ID")
+      UPDATE_USER_RESULT=$($PSQL "UPDATE users SET games_played = games_played + 1, best_game = $BEST_GAME WHERE user_id = $USER_ID")
       
       echo "You guessed it in $GUESSES tries. The secret number was $SECRET_NUMBER. Nice job!"
-      
+      GAME_FINISHED=true
     else 
       
       if [ $GUESSED_NUMBER -lt $SECRET_NUMBER ]
