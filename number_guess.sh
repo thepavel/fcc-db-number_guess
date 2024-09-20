@@ -47,6 +47,7 @@ else
       echo "That is not an integer, guess again:"
       continue
     fi
+echo 'it no worky'
 
     echo "incrementing $GUESSES when guessing: $GUESSED_NUMBER"
     GUESSES=$(( $GUESSES + 1 ))
