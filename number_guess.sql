@@ -49,7 +49,7 @@ SET default_table_access_method = heap;
 
 CREATE TABLE public.users (
     user_id integer NOT NULL,
-    username character varying(22) NOT NULL,
+    name character varying(22) NOT NULL,
     best_game integer DEFAULT 0 NOT NULL,
     games_played integer DEFAULT 0 NOT NULL
 );
@@ -108,11 +108,11 @@ ALTER TABLE ONLY public.users
 
 
 --
--- Name: users users_username_key; Type: CONSTRAINT; Schema: public; Owner: freecodecamp
+-- Name: users users_name_key; Type: CONSTRAINT; Schema: public; Owner: freecodecamp
 --
 
 ALTER TABLE ONLY public.users
-    ADD CONSTRAINT users_username_key UNIQUE (username);
+    ADD CONSTRAINT users_name_key UNIQUE (name);
 
 
 --

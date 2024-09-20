@@ -14,8 +14,8 @@ if [[ -z $USERNAME ]]
 then
   exit
 else 
-  # SELECT user_id, username, games_played, best_game FROM users WHERE username = 'testuser'
-  USER_INFO=$($PSQL "SELECT user_id, username, games_played, best_game FROM users WHERE username = '$USERNAME'")
+  # SELECT user_id, name, games_played, best_game FROM users WHERE name = 'testuser'
+  USER_INFO=$($PSQL "SELECT user_id, name, games_played, best_game FROM users WHERE name = '$USERNAME'")
   USER_INFO_ARRAY=( $( echo $USER_INFO | sed -E 's/\|/\ /g' ) )
   # TODO validate input
 
@@ -23,9 +23,9 @@ else
   then 
     echo "Welcome, $USERNAME! It looks like this is your first time here."
     NEW_USER=true
-    INSERT_USER_RESULT=$($PSQL "INSERT INTO users(username) VALUES('$USERNAME')")
+    INSERT_USER_RESULT=$($PSQL "INSERT INTO users(name) VALUES('$USERNAME')")
 
-    USER_INFO=$($PSQL "SELECT user_id, username, games_played, best_game FROM users WHERE username = '$USERNAME'")
+    USER_INFO=$($PSQL "SELECT user_id, name, games_played, best_game FROM users WHERE name = '$USERNAME'")
     USER_INFO_ARRAY=( $( echo $USER_INFO | sed -E 's/\|/\ /g' ) )
   else   
     echo "Welcome back, $USERNAME! You have played ${USER_INFO_ARRAY[2]} games, and your best game took ${USER_INFO_ARRAY[3]} guesses."
