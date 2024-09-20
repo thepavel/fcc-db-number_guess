@@ -108,11 +108,11 @@ ALTER TABLE ONLY public.users
 
 
 --
--- Name: users users_name_key; Type: CONSTRAINT; Schema: public; Owner: freecodecamp
+-- Name: users users_username_key; Type: CONSTRAINT; Schema: public; Owner: freecodecamp
 --
 
 ALTER TABLE ONLY public.users
-    ADD CONSTRAINT users_name_key UNIQUE (name);
+    ADD CONSTRAINT users_username_key UNIQUE (name);
 
 
 --

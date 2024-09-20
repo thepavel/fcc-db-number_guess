@@ -42,7 +42,10 @@ else
   while [[ "$GAME_FINISHED" != "true" ]] ; do
     read USER_GUESS
     GUESSED_NUMBER=$( echo $USER_GUESS | sed 's/[^0-9]*//g')
-
+    if [[ -z $GUESSED_NUMBER ]]; then 
+      echo "That is not an integer, guess again:"
+      continue
+    fi
     if [ $GUESSED_NUMBER -eq $SECRET_NUMBER ]
     then
       GUESSES=$(( $GUESSES + 1 ))
@@ -63,8 +66,6 @@ else
         then
           GUESSES=$(( $GUESSES + 1 ))
           echo "It's lower than that, guess again:"
-        else 
-          echo "That is not an integer, guess again:"
         fi
       fi
 
