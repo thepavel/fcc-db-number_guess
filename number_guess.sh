@@ -31,6 +31,7 @@ else
   fi
 
   USER_ID=${USER_INFO_ARRAY[0]}
+  GAMES_PLAYED=${USER_INFO_ARRAY[2]}
   BEST_GAME=${USER_INFO_ARRAY[3]}
 
   echo "Guess the secret number between 1 and 1000:"
@@ -51,8 +52,16 @@ else
           echo "It's lower than that, guess again:"
       else if [ $USER_GUESS -eq $SECRET_NUMBER ] ; then
             GAME_FINISHED=true
-            BEST_SCORE=$(($BEST_GAME == 0 || $GUESSES < $BEST_GAME ? $GUESSES : $BEST_GAME))
-            UPDATE_USER_RESULT=$($PSQL "UPDATE users SET best_game = $BEST_GAME WHERE user_id = $USER_ID")
+
+            if [[ -z $BEST_GAME ]] ; then # new users look like this -- they don't have a best game
+              BEST_GAME=$GUESSES
+              GAMES_PLAYED=1
+            else 
+              BEST_GAME=$(($GUESSES < $BEST_GAME ? $GUESSES : $BEST_GAME))
+              ((++GAMES_PLAYED))
+            fi
+            
+            UPDATE_USER_RESULT=$($PSQL "UPDATE users SET games_played = $GAMES_PLAYED, best_game = $BEST_GAME WHERE user_id = $USER_ID")
             
             echo "You guessed it in $GUESSES tries. The secret number was $SECRET_NUMBER. Nice job!"      
           fi 
